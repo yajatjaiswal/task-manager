@@ -1,9 +1,7 @@
-import TaskManager from './components/TaskManager'
+import TaskManager from "./components/TaskManager";
 
 function App() {
-  return (
-    <TaskManager />
-  )
+  return <TaskManager />;
 }
 
-export default App
+export default App;

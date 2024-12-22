@@ -1,70 +1,101 @@
-import React from 'react';
-import { Calendar, Trash2, Edit, Check, X } from 'lucide-react';
-import { Task } from '../types/task';
-import { format } from 'date-fns';
+import React from "react";
+import { Calendar, Trash2, Check, X } from "lucide-react";
+import { Task } from "../types/task";
+import { format } from "date-fns";
+import { TaskForm } from "./TaskForm";
+import { deleteTask } from "../store/taskSlice";
+import { useDispatch } from "react-redux";
 
 interface TaskCardProps {
   task: Task;
-  onToggleStatus: (id: number) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (id: number) => void;
+  onToggleStatus: (id: number | undefined) => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({
-  task,
-  onToggleStatus,
-  onEdit,
-  onDelete,
-}) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onToggleStatus }) => {
+  const dispatch = useDispatch();
+  const handleDelete = (id: number | undefined) => {
+    if (id !== undefined) {
+      dispatch(deleteTask(id));
+    } else {
+      alert("Task ID is undefined");
+    }
+  };
+
   return (
     <div
-      className={`bg-white rounded-lg shadow p-4 ${
-        task.status === 'completed' ? 'opacity-75' : ''
+      className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-4 sm:p-6 ${
+        task.status === "completed" ? "bg-gray-50" : ""
       }`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{task.title}</h3>
+      <div
+        className={`relative flex items-start justify-between gap-4 ${
+          task.description.length === 0 ? "lg:pb-10 pb-4" : "lg:pb-4 pb-0"
+        } `}
+      >
+        <div>
+          <h3
+            className={`text-base sm:text-lg font-semibold ${
+              task.status === "completed"
+                ? "line-through text-gray-500"
+                : "text-gray-900"
+            }`}
+          >
+            {task.title}
+          </h3>
           {task.description && (
-            <p className="text-gray-600 mt-1">{task.description}</p>
+            <p
+              className={`mt-2 text-sm sm:text-base ${
+                task.status === "completed"
+                  ? "line-through text-gray-400"
+                  : "text-gray-600"
+              }`}
+            >
+              {task.description}
+            </p>
           )}
-          <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
-            <Calendar className="w-4 h-4" />
-            {format(new Date(task.dueDate), 'MMM dd, yyyy')}
-          </div>
         </div>
-        
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+          <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className={task.status === "completed" ? "line-through" : ""}>
+            {format(new Date(task.dueDate), "MMM dd, yyyy")}
+          </span>
+        </div>
+
+        <div className="absolute bottom-0 right-0 flex items-center gap-2 sm:gap-3 lg:mt-4 mt-0 w-full sm:w-auto justify-end">
           <button
             type="button"
             onClick={() => onToggleStatus(task.id)}
-            className={`p-2 rounded ${
-              task.status === 'completed'
-                ? 'bg-green-100 text-green-600'
-                : 'bg-gray-100 text-gray-600'
+            className={`p-1 sm:p-2 rounded-full transition-all duration-200 hover:scale-110 ${
+              task.status === "completed"
+                ? "bg-green-100 text-green-600 hover:bg-green-200"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
+            title={
+              task.status === "completed"
+                ? "Mark as incomplete"
+                : "Mark as complete"
+            }
           >
-            {task.status === 'completed' ? (
-              <X className="w-5 h-5" />
+            {task.status === "completed" ? (
+              <X className="w-3 h-3 sm:w-5 sm:h-5" />
             ) : (
-              <Check className="w-5 h-5" />
+              <Check className="w-3 h-3 sm:w-5 sm:h-5" />
             )}
           </button>
-          
+
+          <TaskForm
+            initialNewTask={task}
+            editingId={task.id}
+            isEditing={true}
+          />
+
           <button
             type="button"
-            onClick={() => onEdit(task)}
-            className="p-2 bg-blue-100 text-blue-600 rounded"
+            onClick={() => handleDelete(task.id)}
+            className="p-1 sm:p-2 bg-red-100 text-red-600 rounded-full transition-all duration-200 hover:bg-red-200 hover:scale-110"
+            title="Delete task"
           >
-            <Edit className="w-5 h-5" />
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => onDelete(task.id)}
-            className="p-2 bg-red-100 text-red-600 rounded"
-          >
-            <Trash2 className="w-5 h-5" />
+            <Trash2 className="w-3 h-3 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
